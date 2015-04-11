@@ -1,2 +1,4 @@
 *.sublime-*
 server/node_modules/
+server/uploads/
+*.log
