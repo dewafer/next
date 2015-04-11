@@ -7,13 +7,9 @@
 var express = require('express');
 var router = express.Router();
 var multer = require('multer');
-var serveIndex = require('serve-index');
 
 // 上传需要用到multer中间件
 router.use(multer({ dest: './public/uploads/'}));
-
-// 列出文件的中间件
-router.use('../uploads', serveIndex('./public/uploads/', {'icons': true}));
 
 // 处理get，不显示上传结果。
 router.get('/', function(req, res){

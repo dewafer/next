@@ -14,7 +14,13 @@ var app = express();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
+// 默认的view engine，不设定不行啊……
 app.set('view engine', 'jade');
+
+// 注册jade引擎
+app.engine('jade', require('jade').__express);
+// 注册ejs引擎
+app.engine('html', require('ejs').renderFile);
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(__dirname + '/public/favicon.ico'));
