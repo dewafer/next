@@ -4,15 +4,16 @@
  * http://localhost:3000/upload 访问
  * 在该router中使用的所有中间件及router的相对路径都是在/upload下
  */
-var path = require('path');
 var express = require('express');
 var router = express.Router();
 var multer = require('multer');
+var serveIndex = require('serve-index');
 
 // 上传需要用到multer中间件
-router.use(multer({ dest: './uploads/'}));
-// 公开上传后的文件的路径到uploads目录下
-router.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+router.use(multer({ dest: './public/uploads/'}));
+
+// 列出文件的中间件
+router.use('../uploads', serveIndex('./public/uploads/', {'icons': true}));
 
 // 处理get，不显示上传结果。
 router.get('/', function(req, res){
@@ -26,7 +27,7 @@ router.post('/', function(req, res){
 	res.render('upload', { 
 		uploaded: true
 		, uploadfilename: req.files.file.originalname
-		, uploadfilepath: req.baseUrl + '/' + req.files.file.path
+		, uploadfilepath: '/uploads/' + req.files.file.name
 		, uploadfilesize: req.files.file.size + '字节'
 	});
 });
