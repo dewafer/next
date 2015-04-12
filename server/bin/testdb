@@ -1,0 +1,81 @@
+var driver = require('../lib/dbdriver');
+// 初期化数据库
+var db = driver({
+	// 数据库url
+	url: 'http://localhost:5984/'
+	// 数据库名称
+	, db: 'test'	
+});
+
+// 准备数据库，如果没有的话将自动新建
+db.prepare(function(){
+
+	// 数据
+	var now = new Date();
+	var data1 = {
+		id: 'data1'
+		,username: '用户名'
+		,password: '不告诉你密码'
+		,nickname: '哼哼╭(╯^╰)╮'
+		,insert: now
+		,update: now
+		,value: 'value'
+	}
+
+
+	// 取数据，第一个参数是key，后面一个闭包将会在取到数据时执行
+	db.fetch('xxx--you--will--never--get--this--xxx=' + new Date(), function(data, res, err){
+		console.log('找不到数据：');
+		console.log('error:' + data.error + ', reason:' + data.reason);
+		console.log('statusCode:' + res.statusCode + ' statusMessage:' + res.statusMessage);
+		// 只有当崩掉的时候才有err
+		console.log('err:' + err);
+
+		db.list(function(data) {
+			console.log('所有数据：');
+			// 所有数据
+			console.log(data);
+			console.log('total_rows:' + data.total_rows);
+			console.log('offset:' + data.offset);
+			for(var i=0; i < data.rows.length; i++){
+				console.log(i + ':' + JSON.stringify(data.rows[i]));
+			}
+
+			db.insert(data1, function(data){
+				console.log('插入：');
+				// 插入成功
+				console.log(data);
+
+				db.list(function(data) {
+					console.log('所有数据：');
+					// 所有数据
+					console.log(data);
+
+					db.fetch('data1', function(data){
+						console.log('获取data1数据：');
+						// data1数据
+						console.log(data);
+
+						db.delete({ id: 'data1', rev: data._rev }, function(data){
+							console.log('删除：');
+							// 删除需要id和rev属性
+							// 删除成功
+							console.log(data);
+
+							db.fetch(function(data) {
+								console.log('所有数据：');
+								// 所有数据
+								console.log(data);
+								console.log('total_rows:' + data.total_rows);
+								console.log('offset:' + data.offset);
+								for(var i=0; i < data.rows.length; i++){
+									console.log(i + ':' + JSON.stringify(data.rows[i]));
+								}
+							});
+						});
+					});
+				});
+			});
+		});
+	});
+});
