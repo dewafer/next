@@ -25,7 +25,7 @@ router.post('/', function(req, res){
 
 router.get('/delete/:id/:rev/', function(req, res){
 	db.remove({ id: req.params.id, rev: req.params.rev }, function(){
-		res.redirect('../../../');
+		res.redirect(req.baseUrl);
 	});
 });
 
