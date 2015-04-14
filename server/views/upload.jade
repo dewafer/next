@@ -5,7 +5,7 @@ block content
   p 理论上，在这个页面上你可以上传文件，当然也可以#[a(href='/uploads') 查看]已经上传了哪些文件。
   form(method='post', enctype='multipart/form-data')
     input(type='file', name='file')
-    button(type=submit) 提交
+    button(type='submit') 提交
     a(href='/') 返回
   if uploaded
     p 文件 #[a(href=uploadfilepath, target='_blank') #{uploadfilename}]（大小：#{uploadfilesize}）上传成功！

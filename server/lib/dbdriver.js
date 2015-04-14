@@ -54,10 +54,20 @@ function saveDoc(doc, fn){
 		throw new Error('嗨，你想干什么呢？');
 	}
 
-	var docid = parseDocProp(doc, this.docIdKeys);
-	this.dbrequest.put(this.db + '/' + docid
-		, { body: doc }
-		, handleResponse(fn));
+	try{
+		var docid = parseDocProp(doc, this.docIdKeys);
+		this.dbrequest.put(this.db + '/' + docid
+			, { body: doc }
+			, handleResponse(fn));
+	} catch(e) {
+		if(e instanceof ParseDocPropError) {
+			this.dbrequest.post(this.db
+			, { body: doc }
+			, handleResponse(fn));
+		} else {
+			throw e;
+		}
+	}
 }
 
 Driver.prototype.save = saveDoc;
@@ -88,8 +98,14 @@ function parseDocProp(doc, names) {
 			return prop;
 		}
 	}
-	throw new Error('行行好给个' + names + '吧！');
+	throw new ParseDocPropError('行行好给个' + names + '吧！');
 }
+
+function ParseDocPropError(msg) {
+	this.message = msg;
+}
+
+ParseDocPropError.prototype = new Error();
 
 Driver.prototype.prepare = function (next){
 	var req = this.dbrequest;

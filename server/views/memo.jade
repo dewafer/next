@@ -1,0 +1,15 @@
+extends layout
+
+block content
+  h1 笔记
+  p 今天又啥活要干吗？
+    ul
+      each memo in memos
+        li #{ memo.content } 
+          span.text-muted #{ memo.date } 
+          a(href='delete/#{ memo.id }/#{ memo.rev }/') X
+      li 
+          form(method='post')
+            input(placeholder='干一条活。', name='memo')
+            button(type='submit') 增加
+    a(href='/') 返回

@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 var driver = require('../lib/dbdriver');
 // 初期化数据库
 var db = driver({
