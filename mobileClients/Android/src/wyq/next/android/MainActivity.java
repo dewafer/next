@@ -130,6 +130,7 @@ public class MainActivity extends Activity {
 		@Override
 		protected void onPostExecute(Bitmap result) {
 			mImageView.setImageBitmap(result);
+			mImageView.postInvalidate();
 		}
 
 	}
