@@ -2,5 +2,5 @@
 server/node_modules/
 server/public/uploads/
 *.log
-mobileClients/Android/gen/
-mobileClients/Android/bin/
+mobileClients/Android/Next/gen/
+mobileClients/Android/Next/bin/
