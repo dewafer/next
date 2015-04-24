@@ -14,7 +14,7 @@ Server
 ---
 
 
-1.下载并安装[nodejs](http://nodejs.org)。
+1.下载并安装[nodejs](http://nodejs.org)和[Apache CouchDB](http://couchdb.apache.org)。
 
 
 2.命令行中运行：  

@@ -29,9 +29,10 @@
 
 ## 目录结构
 
-|             目录            |     说明   |
-|----------------------------|------------|
-|[docs](./docs/README.md)	 |文档目录     |
-|[server](./server/README.md)|服务器上的程序|
-|mobileClients				 |移动客户端   |
+|                               目录                                 |     说明   |
+|--------------------------------------------------------------------|------------|
+|[docs](./docs/README.md)	 										 |文档目录     |
+|[server](./server/README.md)										 |服务器上的程序|
+|mobileClients														 |移动客户端    |
+|[mobileClients\Android\Next](./mobileClients/Android/Next/README.md)|安卓版客户端  |
 
