@@ -13,7 +13,7 @@ router.use(multer({ dest: './public/uploads/'}));
 
 // 处理get，不显示上传结果。
 router.get('/', function(req, res){
-	res.render('upload', { uploaded: false });
+	res.render('upload', { title: '上传', uploaded: false });
 });
 
 // 处理post，打印log并显示上传后的结果。

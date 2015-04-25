@@ -1,0 +1,17 @@
+extends layout
+
+block content
+  h1 图片
+  p 有啥好看的图片给我看看？
+    ul
+      each image in images
+        li
+          a(href='/api/#{ image.id }/#{ image.file }') #{ image.title } 
+          span.text-muted #{ image.date } 
+          a(href='delete/#{ image.id }/#{ image.rev }/') X
+      li 
+          form(method='post', enctype='multipart/form-data')
+            input(placeholder='无图无真相', name='imagetitle')
+            input(type='file', accept='image/*', name='file')
+            button(type='submit') 上传
+    a(href='/') 返回

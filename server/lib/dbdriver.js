@@ -29,6 +29,10 @@ function Driver(options){
 	this.docIdKeys = ['id', '_id'];
 	// rev的关键字数组
 	this.docRevKeys = ['rev', '_rev'];
+	// attachment的关键字数组
+	this.docAttachmentKeys = ['file', 'filename'];
+
+	this.docAttachmentTypeKeys = ['type', 'content-type'];
 
 }
 
@@ -61,7 +65,7 @@ Driver.prototype.fetch = function(id, fn) {
 		// 如果没有指定id
 		fn = id;
 		id = null;
-	} else if(typeof(id) == "object" {
+	} else if(typeof(id) == "object") {
 		// 如果指定了对象的话，检查对象里是否有key
 		id = parseDocProp(id, this.docIdKeys);
 	}
@@ -204,6 +208,79 @@ function handleResponse(fn) {
 		}
 	}
 }
+
+function downloadAttachment(doc, pipeTo, fn) {
+	var docid = parseDocProp(doc, this.docIdKeys);
+	var docrev;
+	var attname = parseDocProp(doc, this.docAttachmentKeys);
+	var reqHeaders = {};
+
+	try {
+		docrev = parseDocProp(doc, this.docRevKeys);
+	} catch(e) {
+		if(e instanceof ParseDocPropError) {
+			// do nothing
+		} else {
+			// 其他情况下就把例外抛出去
+			throw e;
+		}
+	}
+
+	if(docrev) {
+		reqHeaders['If-Match'] = docrev;
+	}
+
+	var callback;
+	if(fn) {
+		callback = fn;
+	} else if(pipeTo instanceof Function) {
+		callback = pipeTo;
+	}
+
+	// 发送get请求到数据库
+	var req = this.dbrequest.get(this.db + '/' + docid + '/' + attname
+		, { headers: reqHeaders }, handleResponse(callback));
+
+	// duck typing
+	if(pipeTo && typeof(pipeTo) == 'object' && pipeTo.write) {
+		req.pipe(pipeTo);
+	}
+}
+
+Driver.prototype.download = function(id, filename, pipeTo, fn) {
+	var doc = { id: id, filename: filename };
+	downloadAttachment.call(this, doc, pipeTo, fn);
+}
+Driver.prototype._downloadAttachment = downloadAttachment;
+
+function uploadAttachment(doc, pipeFrom, fn) {
+	var docid = parseDocProp(doc, this.docIdKeys);
+	var docrev = parseDocProp(doc, this.docRevKeys);;
+	var attname = parseDocProp(doc, this.docAttachmentKeys);
+	var atttype = parseDocProp(doc, this.docAttachmentTypeKeys);
+
+	if(!pipeFrom || !pipeFrom.pipe) {
+		throw new Error('请提供一个stream.Readable的对象！');
+	}
+		console.log('=uploadAttachment=')
+		console.log('docid=' + docid);
+		console.log('docrev=' + docrev);
+		console.log('attname=' + attname);
+		console.log('atttype=' + atttype);
+		console.log('pipe=' + pipeFrom);
+
+	var req = this.dbrequest.put(this.db + '/' + docid + '/' + attname
+		, { headers: { 'If-Match': docrev, 'Content-Type': atttype } }
+		, handleResponse(fn));
+
+	pipeFrom.pipe(req);
+}
+
+Driver.prototype.upload = function(id, rev, filename, filetype, readstream, fn) {
+	var doc = { id: id, rev: rev, file: filename, type: filetype };
+	uploadAttachment.call(this, doc, readstream, fn);
+}
+Driver.prototype._uploadAttachment = uploadAttachment;
 
 // 将工厂方法export出去
 module.exports = dbdriver;

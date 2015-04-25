@@ -10,6 +10,8 @@ var routes = require('./routes/index');
 var users = require('./routes/users');
 var upload = require('./routes/upload');
 var memo = require('./routes/memo');
+var images = require('./routes/images');
+var api = require('./routes/api');
 
 var app = express();
 
@@ -37,6 +39,9 @@ app.use('/upload/', upload);
 // 列出文件的中间件
 app.use('/uploads/', serveIndex('./public/uploads/', {'icons': true}));
 app.use('/memo/', memo);
+app.use('/images/', images);
+app.use('/api/', api);
+
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
