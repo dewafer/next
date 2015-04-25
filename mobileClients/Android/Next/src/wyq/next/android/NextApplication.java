@@ -83,6 +83,17 @@ public class NextApplication extends Application {
 		return BitmapFactory.decodeFile(cache.getPath());
 	}
 
+	public void removeCacheFile(String fileName) {
+		File cache = new File(getCacheDir(), fileName);
+		cache.delete();
+	}
+
+	public void removeCacheFileAll() {
+		for (File cache : getCacheDir().listFiles()) {
+			cache.delete();
+		}
+	}
+
 	class DownloadImageUrlsTask extends AsyncTask<Object, Object, String[]> {
 		private AbsListView mContainer;
 

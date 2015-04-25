@@ -59,6 +59,7 @@ public class MainActivity extends Activity {
 		if (id == R.id.action_refresh) {
 			// 都手动刷新了，能不清除cache么？
 			getNextApplication().getThumbCache().clear();
+			getNextApplication().removeCacheFileAll();
 			// 加载图片列表
 			getNextApplication().loadImageUrls(gridview);
 			return true;
@@ -172,16 +173,23 @@ public class MainActivity extends Activity {
 		@Override
 		protected Bitmap doInBackground(Object... params) {
 
+			Bitmap bitmap = null;
+			String cacheFileName = null;
 			Map<String, String> cache = getThumbCache();
 			if (cache.containsKey(mImageUrl)) {
 				// 想啥呢？！如果没cache，每次都去下载表累死我啊
 				// 如果有cache就从cache里拿
-				String cacheFileName = cache.get(mImageUrl);
-				return readCacheFile(cacheFileName);
+				cacheFileName = cache.get(mImageUrl);
+				bitmap = readCacheFile(cacheFileName);
+			}
+
+			if (bitmap != null) {
+				return bitmap;
+			} else if (cacheFileName != null) {
+				getNextApplication().removeCacheFile(cacheFileName);
 			}
 
 			// 开始下载
-			Bitmap bitmap = null;
 			try {
 				// 加载图片
 				URL image = new URL(mImageUrl);
