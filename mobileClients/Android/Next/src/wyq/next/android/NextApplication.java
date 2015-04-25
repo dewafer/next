@@ -7,7 +7,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -18,15 +17,16 @@ import java.util.UUID;
 
 import wyq.next.android.api.NextServerApi;
 import android.app.Application;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.ImageView;
-import android.widget.ImageView.ScaleType;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.RelativeLayout.LayoutParams;
@@ -144,7 +144,7 @@ public class NextApplication extends Application {
 	}
 
 	public void downloadImage(String imgUrl, ViewGroup parentView,
-			ImageViewLayoutInfo imageViewLayoutInfo) {
+			ImageViewCreator mImageViewCreator) {
 		// relativeLayout里面放入一个progressBar表明正在加载
 		ProgressBar progressBar = new ProgressBar(parentView.getContext());
 		// 设置progressBar表示为无限循环
@@ -157,52 +157,41 @@ public class NextApplication extends Application {
 
 		// progressBar加入relativeLayout中
 		parentView.addView(progressBar);
-		new DownloadImageTask(imgUrl, parentView, imageViewLayoutInfo)
-				.execute();
+		new DownloadImageTask(imgUrl, parentView, mImageViewCreator).execute();
 	}
 
 	public void downloadImage(String imgUrl, ViewGroup parentView) {
-		ImageViewLayoutInfo defaultValue = new ImageViewLayoutInfo();
-		defaultValue.layoutParams_h = LayoutParams.MATCH_PARENT;
-		defaultValue.layoutParams_w = LayoutParams.MATCH_PARENT;
-		defaultValue.imageScaleType = ImageView.ScaleType.CENTER_CROP;
-		downloadImage(imgUrl, parentView, defaultValue);
+		downloadImage(imgUrl, parentView, new DefaultImageViewCreator(
+				parentView.getContext()));
 	}
 
 	// 因为在mainThread上不能进行网络操作，所以使用AsyncTask来加载图片
-	public class DownloadImageTask extends AsyncTask<Object, Object, Bitmap> {
+	public class DownloadImageTask extends AsyncTask<Object, Object, String> {
 
 		// 这个view用来装图片子imageView
 		// 理论上应该是relativeView，但在这里我们不需要知道是什么layout
 		// 所以用父类ViewGroup
 		private ViewGroup mParentView;
 		private String mImageUrl;
-		private ImageViewLayoutInfo mImgViewLayoutInfo;
+		private ImageViewCreator mImageViewCreator;
 
 		public DownloadImageTask(String mImageUrl, ViewGroup mParentView,
-				ImageViewLayoutInfo mImgViewLayoutInfo) {
+				ImageViewCreator mImageViewCreator) {
 			this.mImageUrl = mImageUrl;
 			this.mParentView = mParentView;
-			this.mImgViewLayoutInfo = mImgViewLayoutInfo;
+			this.mImageViewCreator = mImageViewCreator;
 		}
 
 		@Override
-		protected Bitmap doInBackground(Object... params) {
+		protected String doInBackground(Object... params) {
 
-			Bitmap bitmap = null;
 			String cacheFileName = null;
 			Map<String, String> cache = getThumbCache();
 			if (cache.containsKey(mImageUrl)) {
 				// 想啥呢？！如果没cache，每次都去下载表累死我啊
 				// 如果有cache就从cache里拿
 				cacheFileName = cache.get(mImageUrl);
-				bitmap = readCacheFile(cacheFileName);
-			}
-
-			if (bitmap != null) {
-				return bitmap;
-			} else if (cacheFileName != null) {
-				removeCacheFile(cacheFileName);
+				return cacheFileName;
 			}
 
 			// 开始下载
@@ -216,24 +205,18 @@ public class NextApplication extends Application {
 				String fileName = UUID.randomUUID().toString();
 				// 图片下载后写成cache文件
 				saveImageAsCacheFile(fileName, conn.getInputStream());
-				// 再把cache文件解码成bitmap
-				bitmap = readCacheFile(fileName);
-				// cache文件读取成功的话
-				if (bitmap != null) {
-					// 保存cache
-					cache.put(mImageUrl, fileName);
-				}
-			} catch (MalformedURLException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
+				// 保存cache
+				cache.put(mImageUrl, fileName);
+				cacheFileName = fileName;
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 			// 如果没有搞到图片则会返回null
-			return bitmap;
+			return cacheFileName;
 		}
 
 		@Override
-		protected void onPostExecute(Bitmap result) {
+		protected void onPostExecute(String result) {
 			View resultView;
 
 			if (result == null) {
@@ -254,16 +237,8 @@ public class NextApplication extends Application {
 				// 搞到图片了
 				// 设置好居中及大小后
 				// 显示
-				ImageView imageView = new ImageView(mParentView.getContext());
-				imageView.setImageBitmap(result);
-				LayoutParams params = new RelativeLayout.LayoutParams(
-						mImgViewLayoutInfo.layoutParams_h,
-						mImgViewLayoutInfo.layoutParams_w);
-				params.addRule(RelativeLayout.CENTER_IN_PARENT);
-				imageView.setLayoutParams(params);
-				imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-				imageView
-						.setPadding(dp2pix(8), dp2pix(8), dp2pix(8), dp2pix(8));
+				ImageView imageView = mImageViewCreator.createImageView(
+						mParentView.getContext(), result);
 				resultView = imageView;
 			}
 
@@ -276,16 +251,42 @@ public class NextApplication extends Application {
 
 	}
 
-	public static class ImageViewLayoutInfo {
-		public int layoutParams_h;
-		public int layoutParams_w;
-		public ScaleType imageScaleType;
+	public static interface ImageViewCreator {
+		public ImageView createImageView(Context context, String imageCacheFile);
+	}
+
+	public static class DefaultImageViewCreator implements ImageViewCreator {
+
+		protected Context mContext;
+
+		public DefaultImageViewCreator(Context mContext) {
+			this.mContext = mContext;
+		}
+
+		@Override
+		public ImageView createImageView(Context context, String imageCacheFile) {
+			ImageView imageView = new ImageView(context);
+			imageView.setImageURI(Uri.fromFile(new File(mContext.getCacheDir(),
+					imageCacheFile)));
+			LayoutParams params = new RelativeLayout.LayoutParams(
+					LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+			params.addRule(RelativeLayout.CENTER_IN_PARENT);
+			imageView.setLayoutParams(params);
+			imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+			imageView.setPadding(dp2pix(8), dp2pix(8), dp2pix(8), dp2pix(8));
+			return imageView;
+		}
+
+		protected final int dp2pix(int dp) {
+			return NextApplication.dp2pix(mContext, dp);
+		}
+
 	}
 
 	// 这个方法把dp单位转换成像素单位
-	public int dp2pix(int dp) {
+	public static int dp2pix(Context context, int dp) {
 		return (int) Math.ceil(TypedValue.applyDimension(
-				TypedValue.COMPLEX_UNIT_DIP, dp, getResources()
+				TypedValue.COMPLEX_UNIT_DIP, dp, context.getResources()
 						.getDisplayMetrics()));
 	}
 

@@ -1,12 +1,14 @@
 package wyq.next.android;
 
-import wyq.next.android.NextApplication.ImageViewLayoutInfo;
+import wyq.next.android.NextApplication.DefaultImageViewCreator;
 import android.app.ActionBar;
 import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.FrameLayout.LayoutParams;
 import android.widget.ImageView;
-import android.widget.RelativeLayout.LayoutParams;
 
 public class ShowLargeImageActivity extends Activity {
 
@@ -25,16 +27,31 @@ public class ShowLargeImageActivity extends Activity {
 
 		String imgUrl = getIntent().getStringExtra(IMAGE_URL);
 
-		ImageViewLayoutInfo layoutInfo = new ImageViewLayoutInfo();
-		layoutInfo.layoutParams_h = LayoutParams.WRAP_CONTENT;
-		layoutInfo.layoutParams_w = LayoutParams.WRAP_CONTENT;
-		layoutInfo.imageScaleType = ImageView.ScaleType.CENTER;
-
-		getNextApplication().downloadImage(imgUrl, imageContainer, layoutInfo);
+		getNextApplication().downloadImage(imgUrl, imageContainer,
+				new LargeImageViewCreator(this));
 	}
 
 	public NextApplication getNextApplication() {
 		return (NextApplication) getApplication();
+	}
+
+	class LargeImageViewCreator extends DefaultImageViewCreator {
+
+		public LargeImageViewCreator(Context context) {
+			super(context);
+		}
+
+		@Override
+		public ImageView createImageView(Context context, String imageCacheFile) {
+			ImageView imageView = new ImageView(context);
+			imageView.setImageBitmap(getNextApplication().readCacheFile(
+					imageCacheFile));
+			LayoutParams params = new FrameLayout.LayoutParams(
+					LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+			imageView.setLayoutParams(params);
+			imageView.setScaleType(ImageView.ScaleType.CENTER);
+			return imageView;
+		}
 	}
 
 }

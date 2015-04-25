@@ -125,7 +125,7 @@ public class MainActivity extends Activity implements OnItemClickListener {
 	private GridView gridview;
 
 	private int dp2pix(int dp) {
-		return getNextApplication().dp2pix(dp);
+		return NextApplication.dp2pix(this, dp);
 	}
 
 }
