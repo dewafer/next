@@ -6,18 +6,31 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import wyq.next.android.api.NextServerApi;
 import android.app.Application;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
+import android.util.TypedValue;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AbsListView;
+import android.widget.ImageView;
+import android.widget.ImageView.ScaleType;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
+import android.widget.RelativeLayout.LayoutParams;
+import android.widget.TextView;
 
 public class NextApplication extends Application {
 
@@ -103,18 +116,10 @@ public class NextApplication extends Application {
 
 		@Override
 		protected String[] doInBackground(Object... params) {
-			// TODO 正真地拉是在这里拉，我不是说拉屎
+			// 正真地拉是在这里拉，我不是说拉屎
 
 			NextServerApi nextApi = new NextServerApi();
 			return nextApi.pullImageList();
-
-			// // 临时地用一个固定的数组来替代一下
-			// return new String[] {
-			// "http://ww2.sinaimg.cn/large/51d3f408gw1eqzld8ueetj207407ggln.jpg",
-			// "http://ww1.sinaimg.cn/large/51d3f408gw1eqzkqh3fhag20az06u1kz.gif",
-			// "http://ww3.sinaimg.cn/large/51d3f408gw1eqzld9mg0bj20dw0afaaj.jpg",
-			// "http://ww1.sinaimg.cn/large/51d3f408gw1eqzlda4swgj20ba0cgjrn.jpg"
-			// };
 		}
 
 		@Override
@@ -136,6 +141,152 @@ public class NextApplication extends Application {
 
 	public Map<String, String> getThumbCache() {
 		return thumbCache;
+	}
+
+	public void downloadImage(String imgUrl, ViewGroup parentView,
+			ImageViewLayoutInfo imageViewLayoutInfo) {
+		// relativeLayout里面放入一个progressBar表明正在加载
+		ProgressBar progressBar = new ProgressBar(parentView.getContext());
+		// 设置progressBar表示为无限循环
+		progressBar.setIndeterminate(true);
+		// 正常大小并且居中
+		LayoutParams params = new RelativeLayout.LayoutParams(
+				LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+		params.addRule(RelativeLayout.CENTER_IN_PARENT);
+		progressBar.setLayoutParams(params);
+
+		// progressBar加入relativeLayout中
+		parentView.addView(progressBar);
+		new DownloadImageTask(imgUrl, parentView, imageViewLayoutInfo)
+				.execute();
+	}
+
+	public void downloadImage(String imgUrl, ViewGroup parentView) {
+		ImageViewLayoutInfo defaultValue = new ImageViewLayoutInfo();
+		defaultValue.layoutParams_h = LayoutParams.MATCH_PARENT;
+		defaultValue.layoutParams_w = LayoutParams.MATCH_PARENT;
+		defaultValue.imageScaleType = ImageView.ScaleType.CENTER_CROP;
+		downloadImage(imgUrl, parentView, defaultValue);
+	}
+
+	// 因为在mainThread上不能进行网络操作，所以使用AsyncTask来加载图片
+	public class DownloadImageTask extends AsyncTask<Object, Object, Bitmap> {
+
+		// 这个view用来装图片子imageView
+		// 理论上应该是relativeView，但在这里我们不需要知道是什么layout
+		// 所以用父类ViewGroup
+		private ViewGroup mParentView;
+		private String mImageUrl;
+		private ImageViewLayoutInfo mImgViewLayoutInfo;
+
+		public DownloadImageTask(String mImageUrl, ViewGroup mParentView,
+				ImageViewLayoutInfo mImgViewLayoutInfo) {
+			this.mImageUrl = mImageUrl;
+			this.mParentView = mParentView;
+			this.mImgViewLayoutInfo = mImgViewLayoutInfo;
+		}
+
+		@Override
+		protected Bitmap doInBackground(Object... params) {
+
+			Bitmap bitmap = null;
+			String cacheFileName = null;
+			Map<String, String> cache = getThumbCache();
+			if (cache.containsKey(mImageUrl)) {
+				// 想啥呢？！如果没cache，每次都去下载表累死我啊
+				// 如果有cache就从cache里拿
+				cacheFileName = cache.get(mImageUrl);
+				bitmap = readCacheFile(cacheFileName);
+			}
+
+			if (bitmap != null) {
+				return bitmap;
+			} else if (cacheFileName != null) {
+				removeCacheFile(cacheFileName);
+			}
+
+			// 开始下载
+			try {
+				// 加载图片
+				URL image = new URL(mImageUrl);
+				HttpURLConnection conn = (HttpURLConnection) image
+						.openConnection();
+				conn.connect();
+				// 用UUID作为文件名
+				String fileName = UUID.randomUUID().toString();
+				// 图片下载后写成cache文件
+				saveImageAsCacheFile(fileName, conn.getInputStream());
+				// 再把cache文件解码成bitmap
+				bitmap = readCacheFile(fileName);
+				// cache文件读取成功的话
+				if (bitmap != null) {
+					// 保存cache
+					cache.put(mImageUrl, fileName);
+				}
+			} catch (MalformedURLException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			// 如果没有搞到图片则会返回null
+			return bitmap;
+		}
+
+		@Override
+		protected void onPostExecute(Bitmap result) {
+			View resultView;
+
+			if (result == null) {
+				// 没有搞到图片肿木板？
+				// 放一个textView写上
+				// 木有图片
+				TextView textView = new TextView(mParentView.getContext());
+				LayoutParams params = new RelativeLayout.LayoutParams(
+						LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+				params.addRule(RelativeLayout.CENTER_IN_PARENT);
+				textView.setLayoutParams(params);
+
+				textView.setText(R.string.no_image);
+
+				resultView = textView;
+			} else {
+
+				// 搞到图片了
+				// 设置好居中及大小后
+				// 显示
+				ImageView imageView = new ImageView(mParentView.getContext());
+				imageView.setImageBitmap(result);
+				LayoutParams params = new RelativeLayout.LayoutParams(
+						mImgViewLayoutInfo.layoutParams_h,
+						mImgViewLayoutInfo.layoutParams_w);
+				params.addRule(RelativeLayout.CENTER_IN_PARENT);
+				imageView.setLayoutParams(params);
+				imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+				imageView
+						.setPadding(dp2pix(8), dp2pix(8), dp2pix(8), dp2pix(8));
+				resultView = imageView;
+			}
+
+			// 父viewGroup中的子view都删了吧
+			// 然后才能正常显示啊
+			mParentView.removeAllViews();
+			mParentView.addView(resultView);
+			mParentView.postInvalidate();
+		}
+
+	}
+
+	public static class ImageViewLayoutInfo {
+		public int layoutParams_h;
+		public int layoutParams_w;
+		public ScaleType imageScaleType;
+	}
+
+	// 这个方法把dp单位转换成像素单位
+	public int dp2pix(int dp) {
+		return (int) Math.ceil(TypedValue.applyDimension(
+				TypedValue.COMPLEX_UNIT_DIP, dp, getResources()
+						.getDisplayMetrics()));
 	}
 
 }

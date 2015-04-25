@@ -1,34 +1,22 @@
 package wyq.next.android;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 
 import android.app.Activity;
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.os.AsyncTask;
+import android.content.Intent;
 import android.os.Bundle;
-import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
-import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
-import android.widget.RelativeLayout.LayoutParams;
-import android.widget.TextView;
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements OnItemClickListener {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +26,7 @@ public class MainActivity extends Activity {
 		// gridview使用ImageAdapter适配器来获得各个子view
 		gridview = (GridView) findViewById(R.id.gridView);
 		gridview.setAdapter(new ImageAdapter(this));
+		gridview.setOnItemClickListener(this);
 
 		// 加载图片列表
 		((NextApplication) getApplication()).loadImageUrls(gridview);
@@ -67,6 +56,15 @@ public class MainActivity extends Activity {
 		return super.onOptionsItemSelected(item);
 	}
 
+	@Override
+	public void onItemClick(AdapterView<?> parent, View view, int position,
+			long id) {
+		Intent intent = new Intent(this, ShowLargeImageActivity.class);
+		intent.putExtra(ShowLargeImageActivity.IMAGE_URL,
+				(String) parent.getItemAtPosition(position));
+		startActivity(intent);
+	}
+
 	public NextApplication getNextApplication() {
 		return (NextApplication) getApplication();
 	}
@@ -74,22 +72,6 @@ public class MainActivity extends Activity {
 	// 从NextApplication中取得thumbUrls的list
 	protected List<String> getThumbUrls() {
 		return getNextApplication().getThumbUrls();
-	}
-
-	// 从NextApplication中取得cache文件的map
-	protected Map<String, String> getThumbCache() {
-		return getNextApplication().getThumbCache();
-	}
-
-	// 读cache文件到bitmap
-	protected Bitmap readCacheFile(String fileName) {
-		return getNextApplication().readCacheFile(fileName);
-	}
-
-	// 把inputStream写到cache目录中的fileName文件
-	protected void saveImageAsCacheFile(String fileName, InputStream is)
-			throws FileNotFoundException, IOException {
-		getNextApplication().saveImageAsCacheFile(fileName, is);
 	}
 
 	/**
@@ -107,11 +89,11 @@ public class MainActivity extends Activity {
 		}
 
 		public Object getItem(int position) {
-			return null;
+			return getThumbUrls().get(position);
 		}
 
 		public long getItemId(int position) {
-			return 0;
+			return position;
 		}
 
 		public View getView(int position, View convertView, ViewGroup parent) {
@@ -131,23 +113,9 @@ public class MainActivity extends Activity {
 				view.removeAllViews();
 			}
 
-			// relativeLayout里面放入一个progressBar表明正在加载
-			ProgressBar progressBar = new ProgressBar(mContext);
-			// 设置progressBar表示为无限循环
-			progressBar.setIndeterminate(true);
-			// 正常大小并且居中
-			LayoutParams params = new RelativeLayout.LayoutParams(
-					LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-			params.addRule(RelativeLayout.CENTER_IN_PARENT);
-			progressBar.setLayoutParams(params);
-
-			// progressBar加入relativeLayout中
-			view.addView(progressBar);
-
 			// 开启下载任务
-			DownloadImageTask task = new DownloadImageTask(getThumbUrls().get(
-					position), view);
-			task.execute();
+			getNextApplication().downloadImage(getThumbUrls().get(position),
+					view);
 
 			// view返回到画面上显示
 			return view;
@@ -156,114 +124,8 @@ public class MainActivity extends Activity {
 
 	private GridView gridview;
 
-	// 因为在mainThread上不能进行网络操作，所以使用AsyncTask来加载图片
-	class DownloadImageTask extends AsyncTask<Object, Object, Bitmap> {
-
-		// 这个view用来装图片子imageView
-		// 理论上应该是relativeView，但在这里我们不需要知道是什么layout
-		// 所以用父类ViewGroup
-		private ViewGroup mParentView;
-		private String mImageUrl;
-
-		public DownloadImageTask(String mImageUrl, ViewGroup mParentView) {
-			this.mImageUrl = mImageUrl;
-			this.mParentView = mParentView;
-		}
-
-		@Override
-		protected Bitmap doInBackground(Object... params) {
-
-			Bitmap bitmap = null;
-			String cacheFileName = null;
-			Map<String, String> cache = getThumbCache();
-			if (cache.containsKey(mImageUrl)) {
-				// 想啥呢？！如果没cache，每次都去下载表累死我啊
-				// 如果有cache就从cache里拿
-				cacheFileName = cache.get(mImageUrl);
-				bitmap = readCacheFile(cacheFileName);
-			}
-
-			if (bitmap != null) {
-				return bitmap;
-			} else if (cacheFileName != null) {
-				getNextApplication().removeCacheFile(cacheFileName);
-			}
-
-			// 开始下载
-			try {
-				// 加载图片
-				URL image = new URL(mImageUrl);
-				HttpURLConnection conn = (HttpURLConnection) image
-						.openConnection();
-				conn.connect();
-				// 用UUID作为文件名
-				String fileName = UUID.randomUUID().toString();
-				// 图片下载后写成cache文件
-				saveImageAsCacheFile(fileName, conn.getInputStream());
-				// 再把cache文件解码成bitmap
-				bitmap = readCacheFile(fileName);
-				// cache文件读取成功的话
-				if (bitmap != null) {
-					// 保存cache
-					cache.put(mImageUrl, fileName);
-				}
-			} catch (MalformedURLException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			// 如果没有搞到图片则会返回null
-			return bitmap;
-		}
-
-		@Override
-		protected void onPostExecute(Bitmap result) {
-			View resultView;
-
-			if (result == null) {
-				// 没有搞到图片肿木板？
-				// 放一个textView写上
-				// 木有图片
-				TextView textView = new TextView(mParentView.getContext());
-				LayoutParams params = new RelativeLayout.LayoutParams(
-						LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-				params.addRule(RelativeLayout.CENTER_IN_PARENT);
-				textView.setLayoutParams(params);
-
-				textView.setText(R.string.no_image);
-
-				resultView = textView;
-			} else {
-
-				// 搞到图片了
-				// 设置好居中及大小后
-				// 显示
-				ImageView imageView = new ImageView(mParentView.getContext());
-				LayoutParams params = new RelativeLayout.LayoutParams(
-						LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
-				params.addRule(RelativeLayout.CENTER_IN_PARENT);
-				imageView.setLayoutParams(params);
-				imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-				imageView
-						.setPadding(dp2pix(8), dp2pix(8), dp2pix(8), dp2pix(8));
-				imageView.setImageBitmap(result);
-
-				resultView = imageView;
-			}
-
-			// 父viewGroup中的子view都删了吧
-			// 然后才能正常显示啊
-			mParentView.removeAllViews();
-			mParentView.addView(resultView);
-			mParentView.postInvalidate();
-		}
-
+	private int dp2pix(int dp) {
+		return getNextApplication().dp2pix(dp);
 	}
 
-	// 这个方法把dp单位转换成像素单位
-	private int dp2pix(int pixel) {
-		return (int) Math.ceil(TypedValue.applyDimension(
-				TypedValue.COMPLEX_UNIT_DIP, pixel, getResources()
-						.getDisplayMetrics()));
-	}
 }
