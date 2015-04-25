@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import wyq.next.android.api.NextServerApi;
 import android.app.Application;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -34,7 +35,7 @@ public class NextApplication extends Application {
 	}
 
 	public void loadImageUrls(AbsListView gridview) {
-		// TODO 这个方法将会去服务器把图片的URL地址给拉下来并更新thumbUrls
+		// 这个方法将会去服务器把图片的URL地址给拉下来并更新thumbUrls
 		// 传入一个gridView，保证url拉完之后去更新这个gridView
 		// 当然如果你传个null我也没办法
 		// 确保这货是异步执行的
@@ -92,12 +93,17 @@ public class NextApplication extends Application {
 		@Override
 		protected String[] doInBackground(Object... params) {
 			// TODO 正真地拉是在这里拉，我不是说拉屎
-			// 临时地用一个固定的数组来替代一下
-			return new String[] {
-					"http://ww2.sinaimg.cn/large/51d3f408gw1eqzld8ueetj207407ggln.jpg",
-					"http://ww1.sinaimg.cn/large/51d3f408gw1eqzkqh3fhag20az06u1kz.gif",
-					"http://ww3.sinaimg.cn/large/51d3f408gw1eqzld9mg0bj20dw0afaaj.jpg",
-					"http://ww1.sinaimg.cn/large/51d3f408gw1eqzlda4swgj20ba0cgjrn.jpg" };
+
+			NextServerApi nextApi = new NextServerApi();
+			return nextApi.pullImageList();
+
+			// // 临时地用一个固定的数组来替代一下
+			// return new String[] {
+			// "http://ww2.sinaimg.cn/large/51d3f408gw1eqzld8ueetj207407ggln.jpg",
+			// "http://ww1.sinaimg.cn/large/51d3f408gw1eqzkqh3fhag20az06u1kz.gif",
+			// "http://ww3.sinaimg.cn/large/51d3f408gw1eqzld9mg0bj20dw0afaaj.jpg",
+			// "http://ww1.sinaimg.cn/large/51d3f408gw1eqzlda4swgj20ba0cgjrn.jpg"
+			// };
 		}
 
 		@Override
