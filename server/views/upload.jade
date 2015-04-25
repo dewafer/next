@@ -4,7 +4,6 @@ block content
   h1 #{title}
   p 理论上，在这个页面上你可以上传文件，当然也可以#[a(href='/uploads') 查看]已经上传了哪些文件。
   form(method='post', enctype='multipart/form-data')
-  	input(name='filename')
     input(type='file', name='file')
     button(type='submit') 提交
     a(href='/') 返回

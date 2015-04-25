@@ -262,12 +262,6 @@ function uploadAttachment(doc, pipeFrom, fn) {
 	if(!pipeFrom || !pipeFrom.pipe) {
 		throw new Error('请提供一个stream.Readable的对象！');
 	}
-		console.log('=uploadAttachment=')
-		console.log('docid=' + docid);
-		console.log('docrev=' + docrev);
-		console.log('attname=' + attname);
-		console.log('atttype=' + atttype);
-		console.log('pipe=' + pipeFrom);
 
 	var req = this.dbrequest.put(this.db + '/' + docid + '/' + attname
 		, { headers: { 'If-Match': docrev, 'Content-Type': atttype } }
