@@ -36,3 +36,8 @@
 |mobileClients														 |移动客户端    |
 |[mobileClients\Android\Next](./mobileClients/Android/Next/README.md)|安卓版客户端  |
 
+
+## 功能简介
+
+请参阅docs目录中的[APP的功能简介卷轴.md](./docs/APP的功能简介卷轴.md)文档。
+
