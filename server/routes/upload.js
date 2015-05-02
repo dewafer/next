@@ -13,15 +13,16 @@ router.use(multer({ dest: './public/uploads/'}));
 
 // 处理get，不显示上传结果。
 router.get('/', function(req, res){
-	res.render('upload', { title: '上传', uploaded: false });
+	res.render('upload.ejs', { title: '上传', uploaded: false });
 });
 
 // 处理post，打印log并显示上传后的结果。
 router.post('/', function(req, res){
 	console.log(req.body)
 	console.log(req.files)
-	res.render('upload', { 
-		uploaded: true
+	res.render('upload.ejs', { 
+        title: '上传成功'
+		, uploaded: true
 		, uploadfilename: req.files.file.originalname
 		, uploadfilepath: '/uploads/' + req.files.file.name
 		, uploadfilesize: req.files.file.size + '字节'

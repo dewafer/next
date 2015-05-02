@@ -15,7 +15,9 @@ var db = driver({
 })
 
 // 准备images的数据库，如没有则创建
-db.prepare();
+router.use(function(req, res, next){
+	db.prepare(next);
+});
 
 router.get('/', function(req, res){
 	db.fetch(function(data) {

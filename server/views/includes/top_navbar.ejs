@@ -1,0 +1,29 @@
+    <nav class="navbar navbar-default navbar-static-top">
+        <div class="container-fluid">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+              <div class="navbar-brand">
+                <span class="glyphicon <%=glyphiconClass%>" aria-hidden="true"></span>
+              </div>
+            </div>
+
+            <div class="collapse navbar-collapse" id="navbar-collapse">
+              <ul class="nav navbar-nav">
+                <li><a href="/">首页</a></li>
+                <li><a href="/upload/">上传</a></li>
+                <li><a href="/uploads/">已上传</a></li>
+                <li><a href="/memo/">笔记</a></li>
+                <li><a href="/images/">图片库</a></li>
+              </ul>
+              <% if(locals.showEditButton) { %>
+              <button type="button" class="btn btn-default navbar-btn navbar-right edit-button">编辑</button>
+              <% } %>
+            </div><!-- /.navbar-collapse -->
+          </div>
+    </nav><!-- /navbar-end -->
+

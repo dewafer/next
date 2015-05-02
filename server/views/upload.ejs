@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+<%- include('includes/html_head') %>
+    <script type="text/javascript">
+    $(function(){
+      $($('ul.navbar-nav > li')[1]).addClass('active');
+    });
+    </script>
+  </head>
+  <body>
+<%- include('includes/top_navbar', { glyphiconClass: 'glyphicon-upload'}) %>
+
+    <div class="container">
+      <div class="row">
+        <div class="cols-sm-12">
+          <h1><%=title%></h1>
+          <p>理论上，在这个页面上你可以上传文件，当然也可以<a href='/uploads'>查看</a>已经上传了哪些文件。</p>
+          <form method='post' enctype='multipart/form-data'>
+            <input type='file' name='file'></input>
+            <button type='submit'>提交</button>
+            <a href="/">返回</a>
+          </form>
+          <% if (uploaded) { %>
+          <p>文件 <a href="<%=uploadfilepath%>" target="_blank"><%=uploadfilename %></a> （大小：<%= uploadfilesize %>）上传成功！
+          <% } %>
+        </div>
+      </div>
+    </div>
+
+<%- include('includes/footer') %>
+  </body>
+</html>

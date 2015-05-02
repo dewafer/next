@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+<%- include('includes/html_head', { title:'笔记' }) %>
+    <script type="text/javascript">
+    $(function(){
+      $($('ul.navbar-nav > li')[3]).addClass('active');
+    });
+    </script>
+  </head>
+  <body>
+<%- include('includes/top_navbar', { glyphiconClass: 'glyphicon-list' }) %>
+
+    <div class="container">
+      <div class="row">
+        <div class="cols-sm-12">
+              <h1>笔记</h1>
+              <p>下今天又啥活要干吗？</p>
+                <ul>
+                  <% for(var i in memos) { %>
+                  <li>
+                    <%= memos[i].content %>
+                    <span class="text-muted"><%= memos[i].date %></span>
+                    <a href="delete/<%= memos[i].id %>/<%= memos[i].rev %>/">X</a>
+                  </li>
+                  <% } %>
+                  <li>
+                    <form method='post' action='create/'>
+                      <input type='text' placeholder='干一条活。' name='memo'></input>
+                      <button type='submit'>增加</button>
+                  </li>
+                </ul>
+        </div>
+      </div>
+    </div>
+
+<%- include('includes/footer') %>
+  </body>
+</html>

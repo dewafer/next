@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+<%- include('includes/html_head') %>
+    <style type="text/css">
+      #content-list li {
+        width: 180px;
+        vertical-align: top;
+        position: relative;
+      }
+      #content-list h5 {
+        word-wrap: break-word;
+      }
+      #content-list a:hover,
+      #content-list a:focus
+      {
+        text-decoration: none;
+      }
+      #content-list a.plus-icon {
+        text-align: center;
+        height: 180px;
+        font-size: 28px;
+      }
+      #content-list span.glyphicon-plus{
+        padding-top: 56px;
+        color: #CCC
+      }
+      #content-list div.remove-icon {
+        position: absolute;
+        top: -5px;
+        right: 0px;
+        background-color: white;
+        border-radius: 50%;
+        width: 18px;
+        height: 18px;
+        text-align: center;
+      }
+      .edit-button {
+        margin-right: 5px;
+      }
+    </style>
+    <script type="text/javascript">
+      $(function(){
+        $('.edit-button').click(
+          function () {
+            $(this).toggleClass('btn-default btn-danger active ');
+            $('.remove-icon').toggleClass("invisible");
+          }
+        );
+        $($('ul.navbar-nav > li')[4]).addClass('active');
+      });
+    </script>
+  </head>
+  <body>
+    <form method="post" enctype="multipart/form-data" action="upload/">
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">上传图片</h4>
+          </div>
+          <div class="modal-body"><!-- modal-body -->
+            <div class="form-group">
+                <label for="imagetitle">标题</label>
+                <input type="text" class="form-control" id="imagetitle" name="imagetitle" placeholder="无图无真相">
+            </div>
+            <div class="form-group">
+              <label for="file">图片文件：</label>
+              <input type="file" id="file" name="file" accept="image/*">
+              <p class="help-block">尽量不要选择太大的图片文件。</p>
+            </div>
+          </div><!-- modal-body end-->
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+            <button type="submit" class="btn btn-primary">上传</button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+    </form>
+
+<%- include('includes/top_navbar', { showEditButton: true, glyphiconClass: 'glyphicon-picture' }) %>
+
+    <div class="container">
+      <div class="row">
+        <div class="cols-sm-12">
+          <ul class="list-unstyled list-inline" id="content-list">
+            <% if (images) {
+                    for(var i in images) {
+                        var image = images[i];
+                        var image_url = '/api/' + image.id + '/' + image.file;
+                        var image_del_url = 'delete/' + image.id + '/' + image.rev;
+                        var image_title = image.title;
+            %>
+                <li><div class="remove-icon pull-right invisible"><a href="<%= image_del_url %>"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a></div>
+                    <div class="list-content">
+                      <a href="<%= image_url %>" target="_blank" class="thumbnail"><img class="img-responsive center-block" src="<%= image_url %>"><h5 class="text-center text-muted"><%= image_title %></h5></a>
+                    </div>
+                </li>
+            <%      } 
+                } %>
+                <li>
+                  <a href="javascript:void(0);" class="thumbnail plus-icon" data-toggle="modal" data-target="#myModal"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span><h5 class="text-center text-muted">增加一张</h5></a>
+                </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+<%- include('includes/footer') %>
+  </body>
+</html>

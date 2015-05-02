@@ -15,7 +15,9 @@ var db = driver({
 })
 
 // 准备images的数据库，如没有则创建
-db.prepare();
+router.use(function(req, res, next){
+	db.prepare(next);
+});
 
 // 使用showAllImages方法列出所有memo文档
 router.get('/', function(req, res){
@@ -23,12 +25,10 @@ router.get('/', function(req, res){
 });
 
 // 创建一个image文档
-router.post('/', function(req, res){
-
-	console.log(req.files);
+router.post('/upload/', function(req, res){
 
 	if(!req.files.file){
-		showAllImages(res);
+		res.redirect(req.baseUrl);
 		return;
 	}
 
@@ -51,9 +51,7 @@ router.post('/', function(req, res){
 		var docrev = data.rev;
 
 		db.upload(docid, docrev, image.file, type, inputStream, function(data){
-			console.log("=uploaded=" );
-			console.log(data);
-			showAllImages(res);
+			res.redirect(req.baseUrl + '/');
 		});
 	});
 });
@@ -63,7 +61,7 @@ router.get('/delete/:id/:rev/', function(req, res){
 	// 使用url中指定的id和rev来删除
 	db.remove({ id: req.params.id, rev: req.params.rev }, function(){
 		// 删除完（无论成功与否）跳转到（当前router的）根目录下
-		res.redirect(req.baseUrl);
+		res.redirect(req.baseUrl + '/');
 	});
 });
 
@@ -86,8 +84,18 @@ function showAllImages(res) {
 
 		// console.log(all);
 
-		// 然后使用memo view来渲染
-		res.render('images', { images: all });
+		// 然后使用image view来渲染
+		//res.render('images', { images: all });
+
+		var locals = {};
+		locals.meta_description = '一个能上传并浏览图片的，一点也不神奇的网站。';
+		locals.meta_author = 'dewafer@gmail.com';
+		locals.title = '你看你看你看图';
+		locals.images = all;
+		// 使用新的image-wall view来渲染
+		// 根据后缀名自动判断引擎
+		// 因为不是默认引擎，所以必须指定后缀名，嗯。
+		res.render('image-wall.ejs', locals);
 	});
 }
 
