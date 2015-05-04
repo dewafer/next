@@ -12,4 +12,8 @@ router.get('/test1.html', function(req, res, next) {
   res.render('test1.ejs', { value: 'this is value' });
 });
 
+router.get('/uploadslist', function(req, res, next) {
+    res.render('uploadslist.ejs', { title: 'List of uploaded files.' });
+});
+
 module.exports = router;

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+<%- include('includes/html_head') %>
+    <script type="text/javascript">
+    $(function(){
+      $($('ul.navbar-nav > li')[0]).addClass('active');
+    });
+    </script>
+
+    <style type="text/css">
+      iframe {
+        position: fixed;
+        bottom: 60px;
+        width: 100%;
+        border-style: none;
+      }
+    </style>
+
+    <script type="text/javascript">
+      function onresize(){
+        $('iframe').css('height', $(window).height() - $('nav').height() - $('footer').height());
+      }
+      $(function(){
+        $(window).resize(onresize);
+        onresize();
+      })
+    </script>
+
+  </head>
+  <body>
+<%- include('includes/top_navbar', { glyphiconClass: 'glyphicon-home' }) %>
+
+    <iframe src="/uploads/"></iframe>
+
+    <%- include('includes/footer') %>
+
+  </body>
+</html>

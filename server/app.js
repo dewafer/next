@@ -37,7 +37,7 @@ app.use('/', routes);
 app.use('/users', users);
 app.use('/upload', upload);
 // 列出文件的中间件
-app.use('/uploads', serveIndex('./public/uploads/', {'icons': true}));
+app.use('/uploads', serveIndex('./public/uploads/', {'icons': true, 'template': path.join(__dirname, 'views/directory.html') }));
 app.use('/memo', memo);
 app.use('/images', images);
 app.use('/api', api);

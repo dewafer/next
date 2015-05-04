@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<!-- 为了放到iframe中去，这是serve-index中的默认模板的改良版。 -->
+<html>
+  <head>
+    <meta charset='utf-8'> 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>listing directory {directory}</title>
+    <style>{style}</style>
+   <!-- 使用jQuery。 -->
+    <script src="http://cdn.bootcss.com/jquery/1.11.2/jquery.min.js"></script>
+    <script>
+      function search() {
+        var str = $('#search').val()
+          , links = $('#files a');
+
+        links.each(function(){
+          var link = $(this);
+          var text = link.text();
+
+          if ('..' == text) return;
+          if (str.length && ~text.indexOf(str)) {
+            link.addClass('highlight');
+          } else {
+            link.removeClass('highlight');
+          }
+        });
+      }
+
+      $(function(){
+        $('#search').on('keyup', search);
+        $('#files a').attr('target', '_blank');
+      });
+    </script>
+  </head>
+  <body class="directory">
+    <input id="search" type="text" placeholder="Search" autocomplete="off" />
+    <div id="wrapper">
+      <h1><a href="/" target="_top">~</a>{linked-path}</h1>
+      {files}
+    </div>
+  </body>
+</html>
