@@ -1,0 +1,6 @@
+public/uploads/
+node_modules/
+npm-debug.log
+README.md
+bin/testdb
+bin/testdb2

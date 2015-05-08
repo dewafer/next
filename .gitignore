@@ -4,3 +4,4 @@ server/public/uploads/
 *.log
 mobileClients/Android/Next/gen/
 mobileClients/Android/Next/bin/
+mobileClients/iOS/

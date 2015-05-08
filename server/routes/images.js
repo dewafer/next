@@ -9,7 +9,7 @@ router.use(multer({ dest: './public/uploads/'}));
 
 var db = driver({
 	// 数据库url
-	url: 'http://localhost:5984/'
+	url: driver.readDbConfigFromVCAP().url || 'http://localhost:5984/'
 	// 数据库名称
 	, db: 'images'	
 })

@@ -1,8 +1,10 @@
 var express = require('express');
 var router = express.Router();
+var debug = require('debug')('server:index');
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
+  debug('--index request--');
   res.render('index.ejs', { title: 'Express', meta_description: '一个能上传并浏览图片的，一点也不神奇的网站。', meta_author: 'dewafer@gmail.com' });
 });
 

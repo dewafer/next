@@ -1,8 +1,26 @@
 var request = require('request');
+var debug = require('debug')('server:dbdriver');
 
 // Driver的工厂方法
 function dbdriver(options) {
 	return new Driver(options);
+}
+
+dbdriver.readDbConfigFromVCAP = function(){
+	var config = {};
+	if(process.env.VCAP_SERVICES) {
+		var vcapServices = JSON.parse(process.env.VCAP_SERVICES);
+		if(vcapServices.cloudantNoSQLDB) {
+			config.host = vcapServices.cloudantNoSQLDB[0].credentials.host;
+			config.port = vcapServices.cloudantNoSQLDB[0].credentials.port;
+			config.user = vcapServices.cloudantNoSQLDB[0].credentials.username;
+			config.password = vcapServices.cloudantNoSQLDB[0].credentials.password;
+			config.url = vcapServices.cloudantNoSQLDB[0].credentials.url;
+		}
+		debug('dbdriver.readDbConfigFromVCAP Services: '+JSON.stringify(process.env.VCAP_SERVICES));
+	}
+	// console.log('config:' + JSON.stringify(config));
+	return config;
 }
 
 // Driver构造器
