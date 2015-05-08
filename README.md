@@ -39,5 +39,10 @@
 
 ## 功能简介
 
-请参阅docs目录中的[APP的功能简介卷轴.md](./docs/APP的功能简介卷轴.md)文档。
+> ** 已发布至bluemix云上，快使用下面的链接来访问吧！ **  
+> [http://appnext.mybluemix.net](http://appnext.mybluemix.net)
+
+
+更具体的说明，请参阅docs目录中的[APP的功能简介卷轴.md](./docs/APP的功能简介卷轴.md)文档。
+
 

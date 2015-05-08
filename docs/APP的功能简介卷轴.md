@@ -1,5 +1,11 @@
 # APP的功能简介卷轴
 
+2015年5月8日更新
+
+* 使用bootstrap美化前端
+* 发布至bluemix云上，现在可以通过[appnext.mybluemix.net](http://appnext.mybluemix.net)实时访问本app的server端啦！
+
+
 2015年4月28日更新
 
 本APP开发到现在，大致能跑的功能如下：
