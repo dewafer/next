@@ -1,10 +1,65 @@
 ﻿<!DOCTYPE html>
 <head>
     <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="利用纯HTML5定位演示代码页面">
+    <meta name="author" content="dewafer">
     <title>HTML5 Geolocation距离跟踪器</title>
+
+    <!-- 新 Bootstrap 核心 CSS 文件 -->
+    <link rel="stylesheet" href="http://cdn.bootcss.com/bootstrap/3.3.4/css/bootstrap.min.css">
+
+    <!-- 可选的Bootstrap主题文件（一般不用引入） -->
+    <link rel="stylesheet" href="http://cdn.bootcss.com/bootstrap/3.3.4/css/bootstrap-theme.min.css">
+
+    <link rel="stylesheet" type="text/css" href="/stylesheets/site.css">
+
+    <!-- jQuery文件。务必在bootstrap.min.js 之前引入 -->
+    <script src="http://cdn.bootcss.com/jquery/1.11.2/jquery.min.js"></script>
+
+    <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+    <script src="http://cdn.bootcss.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+    <script type="text/javascript">
+    $(function(){
+      $($('ul.navbar-nav > li')[5]).addClass('active');
+      loadDemo();
+    });
+    </script>
 </head>
 
-<body onload="loadDemo()">
+<body>
+
+      <nav class="navbar navbar-default navbar-static-top">
+        <div class="container-fluid">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+              <div class="navbar-brand">
+                <span class="glyphicon glyphicon glyphicon-map-marker" aria-hidden="true"></span>
+              </div>
+            </div>
+
+            <div class="collapse navbar-collapse" id="navbar-collapse">
+              <ul class="nav navbar-nav">
+                <li><a href="/">首页</a></li>
+                <li><a href="/upload/">上传</a></li>
+                <li><a href="/uploadslist/">已上传</a></li>
+                <li><a href="/memo/">笔记</a></li>
+                <li><a href="/images/">图片库</a></li>
+                <li><a href="/Tracker.html">定位</a></li>
+              </ul>
+            </div><!-- /.navbar-collapse -->
+          </div>
+    </nav><!-- /navbar-end -->
+
+<div class="container">
+  <div class="row">
+    <div class="cols-sm-12">
 
 <h1>HTML5 Geolocation距离跟踪器</h1>
 
@@ -12,10 +67,10 @@
 <p >所耗时间：<span id="escapedTime">正在计算...</span></p>
 
 <h2>当前位置：</h2>
-<table border="1">
+<table class="table table-hover table-bordered">
 <tr>
-<td width="120" scope="col">纬度（度）</th>
-<td width="114" id="latitude">?</td>
+<td >纬度（度）</th>
+<td id="latitude">?</td>
 </tr>
 <tr>
 <td>经度（度）</td>
@@ -50,7 +105,174 @@
 <h4 id="currDist">本次移动距离：0 千米</h4>
 <h4 id="totalDist">总计移动距离：0 千米</h4>
 
+<div class="panel-group" id="detailDesc" role="tablist" aria-multiselectable="true">
+  <div class="panel panel-default">
+    <div class="panel-heading" role="tab" id="detailOne">
+      <h4 class="panel-title">
+        <a class="collapsed" data-toggle="collapse" data-parent="#detailDesc" href="#collapseOne" aria-controls="collapseOne">
+          详细说明
+        </a>
+      </h4>
+    </div>
+    <div id="collapseOne" class="panel-collapse collapse" role="tabpanel" aria-labelledby="detailOne">
+      <div class="panel-body">
+        <p>
+          本文中的代码来源于developWorkds上的<a href="http://www.ibm.com/developerworks/cn/web/1208_wangjian_html5geo/" target="_blank">这篇文章。</a>不过，如果你仔细阅读过原文中的代码，就会发现其中有2处错误。一处是致命的错误导致距离计算结果变成NaN，另一处使得计算结果显示不正确。不过这两处已在此处的代码中修复了，有兴趣的同学可以比较一下源代码看看错误到底出在哪里。另外，本页面中的代码显示了Position对象中，HTML5定义的所有值，并且加入了一个计时器计算显示定位所耗时间。另外，在调用navigator.geolocation.watchPosition方法时，指定了高精度定位参数<code>enableHighAccuracy:true</code>。
+        </p>
+        <p>
+          我分别尝试了使用PC机上的火狐浏览器（非中国版）、谷歌浏览器(Chrome)、IE浏览器；MAC机上的Safari和谷歌浏览器（Chrome）；Android手机自带浏览器（HTC和小米）和iPhone自带浏览器打开这个页面，结果不同平台上的不同浏览器显示结果都出现了一些意想不到的情况，具体如下表所示（所有平台上都已允许本页面获得定位为前提）。
+          <table class="table table-striped">
+            <caption>本页面在不同平台不同操作系统下的区别</caption>
+            <thead>
+              <tr>
+                <th>平台</th>
+                <th>操作系统</th>
+                <th>浏览器</th>
+                <th>说明</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>PC</td>
+                <td>Windows 7</td>
+                <td>Internet Explorer</td>
+                <td>成功定位。<br>
+                  海拔高度/精度、朝向、速度显示为null(?待确定)。</td>
+              </tr>
+              <tr>
+                <td>PC</td>
+                <td>Windows 7</td>
+                <td>谷歌浏览器</td>
+                <td>无法定位。<br>
+                  一段时间后显示:<br>
+                  <em>
+                    浏览器无法获取您的位置信息：Network location provider at 'https://www.googleapis.com/' : No response received.
+                  </em>
+                </td>
+              </tr>
+              <tr>
+                <td>PC</td>
+                <td>Windows 7</td>
+                <td>火狐浏览器（非中国版）</td>
+                <td>无法定位。<br>
+                  一段时间后显示未知错误。</td>
+              </tr>
+              <tr>
+                <td>MAC</td>
+                <td>OS X Yosemite</td>
+                <td>Safari</td>
+                <td>成功定位。<br>
+                  海拔高度/精度、朝向、速度显示为null，更新timestamp显示为30年前（Stackoverflow上有人问过同样的问题，戳<a href="http://stackoverflow.com/questions/10870138/safari-mac-os-x-lion-returns-wrong-epochtime-value-to-position-timestamp-call" target="_blank">此处看原帖</a>）。</td>
+              </tr>
+              <tr>
+                <td>MAC</td>
+                <td>OS X Yosemite</td>
+                <td>谷歌浏览器</td>
+                <td>与Windows 7中的谷歌浏览器相同，无法定位。</td>
+              </tr>
+              <tr>
+                <td>Android手机(HTC One M7)</td>
+                <td>Android 5.0.2<br>(HTC Sense 6, <br>HTC官方ROM非Android原生)</td>
+                <td>系统自带浏览器</td>
+                <td>成功定位。<br>
+                  待GPS定位成功后除海拔精度为null外都有数值。
+              </tr>
+              <tr>
+                <td>Android手机(HTC One M7)</td>
+                <td>Android 5.0.2<br>(HTC Sense 6, <br>HTC官方ROM非Android原生)</td>
+                <td>谷歌浏览器</td>
+                <td>成功定位。<br>
+                  待GPS定位成功后除海拔精度为null外都有数值。
+                </td>
+              </tr>
+              <tr>
+                <td>Android平板(小米平板)</td>
+                <td>Android 4.4.4<br>(MIUI 5开发版)</td>
+                <td>系统自带浏览器</td>
+                <td>成功定位。<br>
+                  海拔高度/精度、朝向、速度显示为null。<br>
+                  定位耗时较长，平均10秒左右（10000毫秒）。
+                </td>
+              </tr>
+              <tr>
+                <td>Android平板(小米平板)</td>
+                <td>Android 4.4.4<br>(MIUI 5开发版)</td>
+                <td>谷歌浏览器</td>
+                <td>无法定位。<br>
+                  长时间等待后无错误显示。
+                </td>
+              </tr>
+              <tr>
+                <td>iPhone</td>
+                <td>iOS 8</td>
+                <td>系统自带浏览器(Safari)</td>
+                <td>定位成功。<br>
+                  待GPS定位成功后除海拔精度为null外都有数值(?待确定，没本人没有iPhone，求支援)。
+                </td>
+              </tr>
+              <tr>
+                <td>iPad</td>
+                <td>iOS 8</td>
+                <td>系统自带浏览器(Safari)</td>
+                <td>待测定，求一台iPad支援。
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </p>
+      </div>
+    </div>
+  </div>
+  <div class="panel panel-default">
+    <div class="panel-heading" role="tab" id="detailTwo">
+      <h4 class="panel-title">
+        <a class="collapsed" data-toggle="collapse" data-parent="#detailDesc" href="#collapseTwo" aria-controls="collapseTwo">
+          关于谷歌火狐等浏览器无法定位的原因
+        </a>
+      </h4>
+    </div>
+    <div id="collapseTwo" class="panel-collapse collapse" role="tabpanel" aria-labelledby="detailTwo">
+      <div class="panel-body">
+        <p>
+          某些平台上谷歌、火狐等浏览器无法定位的原因是因为，平台未提供诸如GPS的定位功能，进而导致浏览器使用google的api来定位，而众所周知google在国内无法访问，所以导致定位失败。知乎上有文说明得很详细，请看<a href="http://www.zhihu.com/question/20473051/answer/24069580" target="_blank">这篇提问中的Jesion Wang的回答</a>。如果在谷歌/火狐浏览器打开此页面时，使用TCP监控手段查看系统中的连接，可以发现浏览器正在尝试连接如<a href="https://www.baidu.com/s?wd=1e100.net" target="_blank">xxxx.1e100.net</a>，这也佐证了知乎中网友的回答。
+        </p>
+        <p>
+          一个比较简单地解决方案是使用第三方的定位服务，譬如<a href="http://developer.baidu.com/map/jsdemo.htm#i8_1" target="_blank">百度地图API的浏览器定位功能</a>。好处是实现比较简单，坏处则是定位不精确，并且无法直接获得原始GPS数据。如果使用百度地图API，获得的结果是<a href="http://developer.baidu.com/map/index.php?title=open/question#.E5.9D.90.E6.A0.87.E4.BD.93.E7.B3.BB">加密后的百度坐标系</a>坐标，而通过HTML5 Geolaction获得的坐标则是原始的GPS WGS-84系坐标。如果你不满意，这里有个<a href="http://hunray.iteye.com/blog/1404129" target="_blank">百度系坐标换算成GPS坐标的算法</a>。
+        </p>
+      </div>
+    </div>
+  </div>
+  <div class="panel panel-default">
+    <div class="panel-heading" role="tab" id="detailThree">
+      <h4 class="panel-title">
+        <a class="collapsed" data-toggle="collapse" data-parent="#detailDesc" href="#collapseThree" aria-controls="collapseThree">
+          关于各种坐标系
+        </a>
+      </h4>
+    </div>
+    <div id="collapseThree" class="panel-collapse collapse" role="tabpanel" aria-labelledby="detailThree">
+      <div class="panel-body">
+        <p>
+          由于各种原因，GPS设备采集的真实GPS坐标在国内是无法正常使用的，需要经过一个转换才能使用。这是虽然是一个公开的“秘密”，由于我们不谈政治，有兴趣的童鞋请自行向度娘询问以下几个关键字：火星坐标系统、GCJ-02、国家保密插件、GPS纠偏、wgtochina_lb。
+        </p>
+        <p>
+          经过测试和验证，上文（详细说明）中凡是使用HTML5 Geolocation的方法取得的坐标均为地球坐标系的坐标，也就是说如果你想把通过HTML5 Geolocation方法取得的坐标显示在第三方的地图上，需要经过特别的转换才能正确使用。拿百度地图API来说的话，可以参考<a href="http://developer.baidu.com/map/jsdemo.htm#a5_2" target="_blank">这个示例</a>。
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
 
+        </div>
+      </div>
+    </div>
+
+    <footer class="footer">
+      <div class="container">
+        <p class="text-muted pull-right">&copy; dewafer</p>
+      </div>
+    </footer>
+<!-- HTML5 GEO相关的代码从这里开始 -->
 <script type="text/javascript">
 
     var totalDistance = 0.0;
