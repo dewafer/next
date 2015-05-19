@@ -22,7 +22,7 @@
     <script src="http://cdn.bootcss.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
     <script type="text/javascript">
     $(function(){
-      $($('ul.navbar-nav > li')[5]).addClass('active');
+      $('ul.navbar-nav > li#top-nav-btn-tracker').addClass('active');
       loadDemo();
     });
     </script>
@@ -46,12 +46,12 @@
 
             <div class="collapse navbar-collapse" id="navbar-collapse">
               <ul class="nav navbar-nav">
-                <li><a href="/">首页</a></li>
-                <li><a href="/upload/">上传</a></li>
-                <li><a href="/uploadslist/">已上传</a></li>
-                <li><a href="/memo/">笔记</a></li>
-                <li><a href="/images/">图片库</a></li>
-                <li><a href="/Tracker.html">定位</a></li>
+                <li id="top-nav-btn-home"><a href="/">首页</a></li>
+                <li id="top-nav-btn-upload"><a href="/upload/">上传</a></li>
+                <li id="top-nav-btn-uploadslist"><a href="/uploadslist/">已上传</a></li>
+                <li id="top-nav-btn-memo"><a href="/memo/">笔记</a></li>
+                <li id="top-nav-btn-images"><a href="/images/">图片库</a></li>
+                <li id="top-nav-btn-tracker"><a href="/Tracker.html">定位</a></li>
               </ul>
             </div><!-- /.navbar-collapse -->
           </div>
@@ -269,7 +269,7 @@
 
     <footer class="footer">
       <div class="container">
-        <p class="text-muted pull-right">&copy; dewafer</p>
+        <p class="text-muted pull-right"><a href="http://github.com/dewafer/next" target="_blank" class="text-muted">获取源代码</a> &nbsp; &copy; dewafer</p>
       </div>
     </footer>
 <!-- HTML5 GEO相关的代码从这里开始 -->
